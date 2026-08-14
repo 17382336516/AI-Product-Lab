@@ -5,17 +5,15 @@ import ShijianPage from './ShijianPage'
 import ContactPage from './ContactPage'
 import { useViewport } from './useViewport'
 import img1 from '@/imports/image-2.png'                              // Offer到
-import img2 from '@/imports/a2c3c08abc9e7b85088a7b8dd699c83c.jpg'    // 群策
-import img3 from '@/imports/image-3.png'                             // Bingo
+import img3 from '@/imports/image-3.png'                             // 群策
 import img4 from '@/imports/image-4.png'                             // 史影绘卷
 import logoImg from '@/imports/1a649729676d49b38321ae06f8ab5352.png' // dog logo photo
 
 /* ════════════════════════════════════════
    PROJECT DATA
-   Image order corrected:
+   Image order:
    img4 (image-4.png)   → Offer到
    img3 (image-3.png)   → 群策
-   img2 (fridge jpg)    → Bingo
    img1 (image-2.png)   → 史影绘卷
 ════════════════════════════════════════ */
 
@@ -47,19 +45,6 @@ const projects = [
     href: '#qunice',
   },
   {
-    id: 2,
-    name: 'Bingo',
-    title: 'AI Mini Fridge',
-    desc: '一个会"记住冰箱"的交互式小程序，帮助用户管理食材并个性化推荐每日菜谱。',
-    img: img2,
-    imgPos: '26% 28%',
-    bg: '#F3F0F8',
-    accent: '#8B78C2',
-    tag: 'Mini Program',
-    year: '2023',
-    href: '#bingo',
-  },
-  {
     id: 3,
     name: '时鉴',
     title: 'AI History Learning System',
@@ -78,28 +63,27 @@ const projects = [
    CARD DECK CONSTANTS
 ════════════════════════════════════════ */
 
-const CARD_W = 244
-const CARD_H = 372
-const CARD_GAP = 16
-// Container exactly spans 4 expanded cards
-const CONTAINER_W = CARD_W * 4 + CARD_GAP * 3  // 908
+const CARD_W = 274
+const CARD_H = 417
+const CARD_GAP = 18
+// Container exactly spans 3 expanded cards (Bingo removed)
+const CONTAINER_W = CARD_W * 3 + CARD_GAP * 2  // 858
 // Center of expanded layout → stack rests here
-const STACK_LEFT = Math.round((CONTAINER_W - CARD_W) / 2)  // 346
+const STACK_LEFT = Math.round((CONTAINER_W - CARD_W) / 2)  // 292
 
-// Stacked fan — cards visibly spread so all 4 peek out
-const STACKED_R  = [-21, -9,  6,  18]
-const STACKED_Y  = [22,   9,  4,  18]
-const STACKED_X  = [-76, -25, 25, 68]
+// Stacked fan — cards visibly spread so all 3 peek out
+const STACKED_R  = [-21, -9,  18]
+const STACKED_Y  = [22,   9,  18]
+const STACKED_X  = [-76, -25, 68]
 
 // Expanded row — gentle individual tilts
-const EXPANDED_R  = [-1.5, -0.5,  1,    2]
-const EXPANDED_Y  = [4,    -3,    0,    5]
+const EXPANDED_R  = [-1.5, -0.5,  2]
+const EXPANDED_Y  = [4,    -3,    5]
 // Delta X from STACK_LEFT to each card's expanded left edge
 const EXPANDED_DX = [
-  0 - STACK_LEFT,                        // -346
-  (CARD_W + CARD_GAP) - STACK_LEFT,      // -115
-  (CARD_W + CARD_GAP) * 2 - STACK_LEFT, // +116
-  (CARD_W + CARD_GAP) * 3 - STACK_LEFT, // +347
+  0 - STACK_LEFT,                               // -292
+  (CARD_W + CARD_GAP) - STACK_LEFT,             //    0
+  (CARD_W + CARD_GAP) * 2 - STACK_LEFT,         // +292
 ]
 
 /* ════════════════════════════════════════

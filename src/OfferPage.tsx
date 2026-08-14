@@ -739,7 +739,7 @@ function TryOfferButton() {
   return (
     <div style={{ position: 'absolute', right: 72, top: 48, zIndex: 30 }}>
       <button
-        onClick={() => window.open('https://offer-dao.vercel.app/', '_blank', 'noopener,noreferrer')}
+        onClick={() => window.open('http://118.178.145.31:8080/', '_blank', 'noopener,noreferrer')}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         style={{

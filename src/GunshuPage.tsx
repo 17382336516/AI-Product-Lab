@@ -1012,10 +1012,23 @@ export default function GunshuPage({
 
 function TryGunshuButton() {
   const [hovered, setHovered] = useState(false)
+  // Mobile-only toast: on touch devices, tapping does NOT navigate — show a hint instead.
+  const [mobileHint, setMobileHint] = useState(false)
+  const isTouch =
+    typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches
+
+  const handleClick = () => {
+    if (isTouch) {
+      setMobileHint(true)
+      return
+    }
+    window.open('https://ai-customer-intelligence-agent.vercel.app/', '_blank', 'noopener,noreferrer')
+  }
+
   return (
     <div style={{ position: 'absolute', right: 72, top: 114, zIndex: 30 }}>
       <button
-        onClick={() => window.open('https://ai-customer-intelligence-agent.vercel.app/', '_blank', 'noopener,noreferrer')}
+        onClick={handleClick}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         style={{
@@ -1030,7 +1043,18 @@ function TryGunshuButton() {
           transition: 'transform 220ms ease, box-shadow 220ms ease',
         }}
       >Try 群策</button>
-      {hovered && <div style={{ position: 'absolute', top: 'calc(100% + 10px)', right: 0, whiteSpace: 'nowrap', padding: '7px 12px', borderRadius: 12, background: '#FFFDF8', border: '1px solid #5B9FE8', color: '#2C6DB0', fontFamily: F, fontSize: 12, boxShadow: '0 8px 18px rgba(44,40,32,0.12)' }}>✦ 点击跳转至产品网页哦~ ✦</div>}
+      {hovered && !isTouch && <div style={{ position: 'absolute', top: 'calc(100% + 10px)', right: 0, whiteSpace: 'nowrap', padding: '7px 12px', borderRadius: 12, background: '#FFFDF8', border: '1px solid #5B9FE8', color: '#2C6DB0', fontFamily: F, fontSize: 12, boxShadow: '0 8px 18px rgba(44,40,32,0.12)' }}>✦ 点击跳转至产品网页哦~ ✦</div>}
+      {mobileHint && (
+        <div
+          onClick={(e) => { e.stopPropagation(); setMobileHint(false) }}
+          style={{
+            position: 'absolute', top: 'calc(100% + 10px)', right: 0, whiteSpace: 'nowrap',
+            padding: '9px 14px', borderRadius: 12, background: '#FFFDF8',
+            border: '1px solid #5B9FE8', color: '#2C6DB0', fontFamily: F, fontSize: 13,
+            fontWeight: 600, boxShadow: '0 8px 18px rgba(44,40,32,0.12)', cursor: 'pointer',
+          }}
+        >建议PC端使用哦~ ✦</div>
+      )}
     </div>
   )
 }
