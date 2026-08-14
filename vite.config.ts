@@ -3,12 +3,34 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
 
-import siteConfiguration from './.figma/make/site.json'
+// Figma Make imports — only available when running inside Figma Make (.figma/ exists)
+// Cloudflare / standard builds skip these gracefully.
+let siteConfiguration: any = undefined
+try {
+  siteConfiguration = require('./.figma/make/site.json')
+} catch {
+  // not in Figma Make environment — ignore
+}
 
 // Vite config — https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   // .figma/make/deploy-preview passes `--mode development` for cached-preview builds.
   const emitSourcemaps = mode === 'development'
+
+  const plugins: Plugin[] = [
+    react(),
+    tailwindcss(),
+  ]
+
+  // Only add Figma Make plugins when site.json is available (local Figma Make dev)
+  if (siteConfiguration) {
+    plugins.push(
+      figmaSiteConfiguration(siteConfiguration),
+      figmaErrorOverlayReplay(),
+      figmaReactRefreshBoundaryFallback(),
+      figmaMakeKitPlugin({ storiesGlob: '/src/**/*.stories.{ts,tsx,js,jsx}' }),
+    )
+  }
 
   return {
     base: process.env.FIGMA_PUBLIC_URL ? `${process.env.FIGMA_PUBLIC_URL}/` : '/',
@@ -16,14 +38,7 @@ export default defineConfig(({ mode }) => {
       sourcemap: emitSourcemaps ? 'inline' : false,
       minify: !emitSourcemaps,
     },
-    plugins: [
-      react(),
-      tailwindcss(),
-      figmaSiteConfiguration(siteConfiguration),
-      figmaErrorOverlayReplay(),
-      figmaReactRefreshBoundaryFallback(),
-      figmaMakeKitPlugin({ storiesGlob: '/src/**/*.stories.{ts,tsx,js,jsx}' }),
-    ],
+    plugins,
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
