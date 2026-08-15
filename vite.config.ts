@@ -8,6 +8,34 @@ import path from 'node:path'
 // (Figma Make plugins below are defined but NOT used in production builds)
 // ════════════════════════════════════════
 
+// Redirects `import x from './foo.png'` (or `@/imports/foo.png`) to the
+// corresponding `.webp` when it exists, so we serve compressed images
+// without changing any component code.
+function webpRedirect(): Plugin {
+  const fs = require('node:fs')
+  const path = require('node:path')
+  const srcDir = path.resolve(__dirname, './src')
+  return {
+    name: 'webp-redirect',
+    enforce: 'pre',
+    resolveId(source, importer) {
+      if (!/\.(png|jpe?g)$/i.test(source)) return null
+      const webp = source.replace(/\.(png|jpe?g)$/i, '.webp')
+      // relative import
+      if (importer) {
+        const absWebp = path.resolve(path.dirname(importer), webp)
+        if (fs.existsSync(absWebp)) return absWebp
+      }
+      // alias-style `@/imports/...`
+      if (source.startsWith('@/')) {
+        const absWebp = path.resolve(srcDir, webp.replace(/^@\//, ''))
+        if (fs.existsSync(absWebp)) return absWebp
+      }
+      return null
+    },
+  }
+}
+
 export default defineConfig(({ mode }) => {
   const emitSourcemaps = mode === 'development'
 
@@ -18,6 +46,7 @@ export default defineConfig(({ mode }) => {
       minify: !emitSourcemaps,
     },
     plugins: [
+      webpRedirect(),
       react(),
       tailwindcss(),
     ],

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useCrossProjectNav } from './useCrossProjectNav'
+import NextProductHint from './NextProductHint'
 
 /* ── Dog ── */
 import dogImg from '@/imports/860832308b1dc5fc7ce52f10234ec4ac.jpg'
@@ -938,20 +939,12 @@ function Screen2({ visible, workflowStep }: { visible: boolean; workflowStep: nu
           ))}
         </div>
 
-        {/* Floating down arrow — scroll to next product */}
-        <div style={{
-          position: 'absolute', bottom: 10, left: 0, right: 0,
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-          animation: 'nextProductFloat 2.2s ease-in-out infinite',
-          pointerEvents: 'none',
-        }}>
-          <span style={{ fontFamily: FO, fontSize: 10, color: '#C8BEB4', letterSpacing: '0.06em' }}>
-            了解下一个产品
-          </span>
-          <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
-            <path d="M2 2 L8 8 L14 2" stroke="#C8BEB4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
+        {/* Floating down arrow — scroll to next product (bottom, shifted left, color by step) */}
+        <NextProductHint
+          style={{ left: '24%' }}
+          variant={workflowStep === 3 ? 'strong' : 'faint'}
+          text={workflowStep === 3 ? '下滑了解下一个产品' : '下滑了解下一个功能'}
+        />
 
         {/* Lightbox — click to enlarge screenshot */}
         {zoomImg && (

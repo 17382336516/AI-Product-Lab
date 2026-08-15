@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from 'react'
 import { useCrossProjectNav } from './useCrossProjectNav'
+import NextProductHint from './NextProductHint'
 import dogImg from '@/imports/gunshu-dog.png'
 import screen01 from '@/imports/2.1.png'
 import screen02 from '@/imports/2.2.png'
@@ -589,7 +590,7 @@ const CARD_SPECS = [
 
 type CardSpec = typeof CARD_SPECS[number]
 
-function ArchitecturePanel({ activeIdx }: { activeIdx: number }) {
+function ArchitecturePanel({ activeIdx, onSelect }: { activeIdx: number; onSelect?: (idx: number) => void }) {
   const greenFull = { bg: '#EEF8F2', border: '#6DBA8A', color: '#2A6044' }
   const greenDim  = { bg: '#FAFAF8', border: '#D8EDE0', color: '#A0B8AA' }
   const blueFull  = { bg: '#EEF4FD', border: '#5B9FE8', color: '#1E5C8E' }
@@ -602,12 +603,15 @@ function ArchitecturePanel({ activeIdx }: { activeIdx: number }) {
   const kS = activeIdx === 2 ? orangeFull : orangeDim
   const sS = activeIdx === 2 ? orangeFull : orangeDim
 
-  const node = (label: string, sub: string, s: { bg: string; border: string; color: string }, active = false) => (
-    <div style={{
-      flex: 1, padding: active ? '12px 6px' : '10px 6px', background: s.bg, border: `1.5px solid ${s.border}`,
-      borderRadius: 12, textAlign: 'center', transition: 'all 0.4s ease',
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-    }}>
+  const node = (label: string, sub: string, s: { bg: string; border: string; color: string }, active = false, idx?: number) => (
+    <div
+      onClick={idx !== undefined && onSelect ? () => onSelect(idx) : undefined}
+      style={{
+        flex: 1, padding: active ? '12px 6px' : '10px 6px', background: s.bg, border: `1.5px solid ${s.border}`,
+        borderRadius: 12, textAlign: 'center', transition: 'all 0.4s ease',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        cursor: onSelect && idx !== undefined ? 'pointer' : 'default',
+      }}>
       <div style={{ fontFamily: F, fontSize: active ? 17 : 15, fontWeight: active ? 800 : 700, color: s.color, transition: 'all 0.4s ease', lineHeight: 1.3, whiteSpace: 'nowrap' }}>{label}</div>
       <div style={{ fontFamily: F, fontSize: active ? 14 : 12.5, color: s.color + '99', marginTop: 2, lineHeight: 1.3, fontWeight: active ? 600 : 400, whiteSpace: 'nowrap' }}>{sub}</div>
     </div>
@@ -638,9 +642,9 @@ function ArchitecturePanel({ activeIdx }: { activeIdx: number }) {
 
       {/* 3 Sub-agents */}
       <div style={{ display: 'flex', gap: 8, width: 400, alignItems: 'stretch' }}>
-        {node('Data Agent', '数据分析', dS, activeIdx === 0)}
-        {node('Insight Agent', '用户洞察', iS, activeIdx === 1)}
-        {node('Knowledge Agent', '企业知识RAG', kS, activeIdx === 2)}
+        {node('Data Agent', '数据分析', dS, activeIdx === 0, 0)}
+        {node('Insight Agent', '用户洞察', iS, activeIdx === 1, 1)}
+        {node('Knowledge Agent', '企业知识RAG', kS, activeIdx === 2, 2)}
       </div>
 
       {/* Fan-in: 3 agents → Strategy Agent */}
@@ -653,10 +657,13 @@ function ArchitecturePanel({ activeIdx }: { activeIdx: number }) {
       </svg>
 
       {/* Strategy Agent */}
-      <div style={{
-        padding: activeIdx === 2 ? '13px 40px' : '11px 38px', background: sS.bg, border: `1.5px solid ${sS.border}`,
-        borderRadius: 14, textAlign: 'center', transition: 'all 0.4s ease',
-      }}>
+      <div
+        onClick={() => onSelect && onSelect(2)}
+        style={{
+          padding: activeIdx === 2 ? '13px 40px' : '11px 38px', background: sS.bg, border: `1.5px solid ${sS.border}`,
+          borderRadius: 14, textAlign: 'center', transition: 'all 0.4s ease',
+          cursor: onSelect ? 'pointer' : 'default',
+        }}>
         <div style={{ fontFamily: F, fontSize: activeIdx === 2 ? 17 : 15, fontWeight: activeIdx === 2 ? 800 : 700, color: sS.color, transition: 'all 0.4s ease' }}>Strategy Agent</div>
         <div style={{ fontFamily: F, fontSize: activeIdx === 2 ? 14 : 12, color: sS.color + '99', marginTop: 2, fontWeight: activeIdx === 2 ? 600 : 400 }}>营销策略生成</div>
       </div>
@@ -838,6 +845,39 @@ function Page2({ visible, onUp, onNavigateNext, initialActiveIdx = 0 }: {
       }}
       onWheel={handleWheel}
     >
+      {/* Hover hot-zones: hover left side → slide up (prev), hover right side → slide down (next) */}
+      {activeIdx > 0 && (
+        <div
+          onMouseEnter={() => {
+            if (lock.current) return
+            lock.current = true
+            setActiveIdx(i => Math.max(0, i - 1))
+            setTimeout(() => { lock.current = false }, 500)
+          }}
+          style={{ position: 'absolute', left: 0, top: 64, bottom: 0, width: '40%', zIndex: 15, cursor: 'w-resize' }}
+        />
+      )}
+      {activeIdx < 2 && (
+        <div
+          onMouseEnter={() => {
+            if (lock.current) return
+            lock.current = true
+            setActiveIdx(i => Math.min(2, i + 1))
+            setTimeout(() => { lock.current = false }, 500)
+          }}
+          style={{ position: 'absolute', right: 0, top: 64, bottom: 0, width: '40%', zIndex: 15, cursor: 'e-resize' }}
+        />
+      )}
+      {activeIdx === 2 && (
+        <div
+          onMouseEnter={() => {
+            if (lock.current) return
+            lock.current = true
+            onNavigateNext && onNavigateNext()
+          }}
+          style={{ position: 'absolute', right: 0, top: 64, bottom: 0, width: '40%', zIndex: 15, cursor: 'e-resize' }}
+        />
+      )}
       <div style={{ height: '100%', padding: '24px 56px 18px', display: 'flex', gap: 44, boxSizing: 'border-box' }}>
 
         {/* LEFT — Architecture */}
@@ -847,16 +887,21 @@ function Page2({ visible, onUp, onNavigateNext, initialActiveIdx = 0 }: {
             <div style={{ fontFamily: F, fontSize: 18, fontWeight: 600, color: '#756B62', marginTop: 6 }}>从用户数据分析，到营销策略生成</div>
           </div>
           <div style={{ fontFamily: F, fontSize: 16, fontWeight: 700, color: '#4B3F35', marginTop: 8, marginBottom: 14, letterSpacing: '-0.01em' }}>Controlled Multi-Agent System</div>
-          <ArchitecturePanel activeIdx={activeIdx} />
+          <ArchitecturePanel activeIdx={activeIdx} onSelect={(idx) => {
+            if (lock.current) return
+            lock.current = true
+            setActiveIdx(idx)
+            setTimeout(() => { lock.current = false }, 400)
+          }} />
           <AIEnginePanel />
         </div>
 
         {/* RIGHT — Carousel */}
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
           {/* Label */}
-          <div style={{ marginBottom: 14, flexShrink: 0 }}>
-            <div style={{ fontFamily: F, fontSize: 10, fontWeight: 700, color: '#B5ADA2', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>Product Flow</div>
-            <div style={{ fontFamily: F, fontSize: 13, color: '#9C9489' }}>通过三个阶段完成：数据理解 → 用户洞察 → 策略生成</div>
+          <div style={{ marginBottom: 14, flexShrink: 0, marginLeft: 24 }}>
+            <div style={{ fontFamily: F, fontSize: 13, fontWeight: 700, color: '#B5ADA2', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>Product Flow</div>
+            <div style={{ fontFamily: F, fontSize: 16, color: '#9C9489' }}>通过三个阶段完成：数据理解 → 用户洞察 → 策略生成</div>
           </div>
 
           {/* Cards stage */}
@@ -920,17 +965,12 @@ function Page2({ visible, onUp, onNavigateNext, initialActiveIdx = 0 }: {
             )}
           </div>
 
-          {/* Floating arrow — next product */}
-          <div style={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-            paddingTop: 4, animation: 'nextProductFloat 2.2s ease-in-out infinite',
-            pointerEvents: 'none',
-          }}>
-            <span style={{ fontFamily: F, fontSize: 10, color: '#C8BEB4', letterSpacing: '0.06em' }}>了解下一个产品</span>
-            <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
-              <path d="M2 2 L8 8 L14 2" stroke="#C8BEB4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
+          {/* Floating down arrow — scroll to next product (bottom, shifted right, shared) */}
+          <NextProductHint
+            style={{ left: '45%' }}
+            variant={activeIdx === 2 ? 'strong' : 'faint'}
+            text={activeIdx === 2 ? '下滑了解下一个产品' : '下滑了解下一个功能'}
+          />
 
           {/* Dots */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 10, flexShrink: 0 }}>
