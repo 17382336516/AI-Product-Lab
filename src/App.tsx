@@ -4,6 +4,8 @@ import GunshuPage from './GunshuPage'
 import ShijianPage from './ShijianPage'
 import ContactPage from './ContactPage'
 import { useViewport } from './useViewport'
+import { useTouchNavigation } from './useTouchNavigation'
+import PageArrows from './PageArrows'
 import img1 from '@/imports/image-2.png'                              // Offer到
 import img3 from '@/imports/image-3.png'                             // 群策
 import img4 from '@/imports/image-4.png'                             // 史影绘卷
@@ -904,6 +906,13 @@ export default function App() {
     return () => window.removeEventListener('wheel', handler)
   }, [offerOpen, gunshuOpen, shijianOpen, contactOpen, openOffer])
 
+  /* ── home touch / tap → open Offer (mobile fallback) ── */
+  useTouchNavigation({
+    onNext: () => {
+      if (!(offerOpen || gunshuOpen || shijianOpen || contactOpen)) openOffer()
+    },
+  })
+
   /* ── close back to home ── */
   const closeOffer   = useCallback(() => unbloom(() => setOfferOpen(false)),   [])
   const closeGunshu  = useCallback(() => unbloom(() => setGunshuOpen(false)),  [])
@@ -952,6 +961,7 @@ export default function App() {
         <Clothesline />
         <BrandHeader vp={vp} />
         <HeroSection mounted={mounted} vp={vp} onNavigateOffer={openOffer} onNavigateGunshu={openGunshu} onNavigateShijian={openShijian} />
+        <PageArrows showPrev={false} onNext={openOffer} />
       </div>
 
       {/* Page-bloom transition overlay */}

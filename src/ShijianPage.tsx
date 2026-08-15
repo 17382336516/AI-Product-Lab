@@ -1,4 +1,5 @@
-import { useState, useRef, type ReactNode, type WheelEvent, Fragment } from 'react'
+import { useState, useRef, useCallback, type ReactNode, type WheelEvent, Fragment } from 'react'
+import PageArrows from './PageArrows'
 
 /* ── Why screen assets ── */
 import valueCard01 from '@/imports/4.1.png'
@@ -421,6 +422,7 @@ function WhyScreen({ onSwitchToHow, onNavigatePrev }: { onSwitchToHow: () => voi
   const [hoverPain,  setHoverPain]  = useState<number | null>(null)
   const [hoverValue, setHoverValue] = useState<number | null>(null)
   const [cooldown, setCooldown] = useState(false)
+  const tStart = useRef({ x: 0, y: 0 })
 
   function handleWheel(e: WheelEvent) {
     if (cooldown) return
@@ -434,9 +436,32 @@ function WhyScreen({ onSwitchToHow, onNavigatePrev }: { onSwitchToHow: () => voi
     }
   }
 
+  // Touch / tap fallback (mobile, no wheel)
+  const onTouchStart = (e: React.TouchEvent) => { tStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY } }
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (cooldown) return
+    const dx = e.changedTouches[0].clientX - tStart.current.x
+    const dy = e.changedTouches[0].clientY - tStart.current.y
+    if (Math.abs(dy) < 50 && Math.abs(dx) < 50) return
+    const up = dy < 0 || (Math.abs(dx) > Math.abs(dy) && dx < 0)
+    const down = dy > 0 || (Math.abs(dx) > Math.abs(dy) && dx > 0)
+    if (down) { setCooldown(true); onSwitchToHow(); setTimeout(() => setCooldown(false), 800) }
+    else if (up && onNavigatePrev) { setCooldown(true); onNavigatePrev() }
+  }
+  const onClick = (e: React.MouseEvent) => {
+    if (cooldown) return
+    setCooldown(true)
+    if (e.clientX < window.innerWidth / 2) { if (onNavigatePrev) onNavigatePrev() }
+    else { onSwitchToHow() }
+    setTimeout(() => setCooldown(false), 800)
+  }
+
   return (
     <div
       onWheel={handleWheel}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+      onClick={onClick}
       style={{
         position: 'relative',
         flex: 1, minHeight: 0, overflow: 'hidden',
@@ -544,6 +569,7 @@ function HowScreen({ onNavigateNext, onNavigatePrev }: { onNavigateNext?: () => 
   const [hoveredShot, setHoveredShot] = useState<number | null>(null)
   const [cooldown, setCooldown] = useState(false)
   const [lightbox, setLightbox] = useState<number | null>(null)
+  const tStart = useRef({ x: 0, y: 0 })
 
   function handleWheel(e: WheelEvent) {
     if (cooldown) return
@@ -558,9 +584,32 @@ function HowScreen({ onNavigateNext, onNavigatePrev }: { onNavigateNext?: () => 
     }
   }
 
+  // Touch / tap fallback (mobile, no wheel)
+  const onTouchStart = (e: React.TouchEvent) => { tStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY } }
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (cooldown) return
+    const dx = e.changedTouches[0].clientX - tStart.current.x
+    const dy = e.changedTouches[0].clientY - tStart.current.y
+    if (Math.abs(dy) < 50 && Math.abs(dx) < 50) return
+    const up = dy < 0 || (Math.abs(dx) > Math.abs(dy) && dx < 0)
+    const down = dy > 0 || (Math.abs(dx) > Math.abs(dy) && dx > 0)
+    if (down && onNavigateNext) { setCooldown(true); onNavigateNext(); setTimeout(() => setCooldown(false), 800) }
+    else if (up && onNavigatePrev) { setCooldown(true); onNavigatePrev(); setTimeout(() => setCooldown(false), 800) }
+  }
+  const onClick = (e: React.MouseEvent) => {
+    if (cooldown) return
+    setCooldown(true)
+    if (e.clientX < window.innerWidth / 2) { if (onNavigatePrev) onNavigatePrev() }
+    else { if (onNavigateNext) onNavigateNext() }
+    setTimeout(() => setCooldown(false), 800)
+  }
+
   return (
     <div
       onWheel={handleWheel}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+      onClick={onClick}
       style={{
         flex: 1, overflow: 'hidden',
         display: 'flex', flexDirection: 'column',
@@ -738,6 +787,25 @@ function HowScreen({ onNavigateNext, onNavigatePrev }: { onNavigateNext?: () => 
 
 export default function ShijianPage({ onBack, onNavigateNext, onNavigatePrev, initialTab = 'why' }: { onBack: () => void; onNavigateNext?: () => void; onNavigatePrev?: () => void; initialTab?: Tab }) {
   const [activeTab, setActiveTab] = useState<Tab>(initialTab)
+  const navLock = useRef(false)
+  const tabRef = useRef(activeTab)
+  tabRef.current = activeTab
+
+  /* ── unified next/prev (touch, tap and arrows) ── */
+  const shijianNext = useCallback(() => {
+    if (navLock.current) return
+    navLock.current = true
+    if (tabRef.current === 'why') setActiveTab('how')
+    else if (onNavigateNext) onNavigateNext()
+    setTimeout(() => { navLock.current = false }, 800)
+  }, [onNavigateNext])
+  const shijianPrev = useCallback(() => {
+    if (navLock.current) return
+    navLock.current = true
+    if (tabRef.current === 'how') setActiveTab('why')
+    else if (onNavigatePrev) onNavigatePrev()
+    setTimeout(() => { navLock.current = false }, 800)
+  }, [onNavigatePrev])
 
   return (
     <div style={{
@@ -748,9 +816,10 @@ export default function ShijianPage({ onBack, onNavigateNext, onNavigatePrev, in
     }}>
       <ShijianHeader onBack={onBack} activeTab={activeTab} onTabChange={setActiveTab} />
       {activeTab === 'why'
-        ? <WhyScreen onSwitchToHow={() => setActiveTab('how')} onNavigatePrev={onNavigatePrev} />
-        : <HowScreen onNavigateNext={onNavigateNext} onNavigatePrev={() => setActiveTab('why')} />
+        ? <WhyScreen onSwitchToHow={shijianNext} onNavigatePrev={shijianPrev} />
+        : <HowScreen onNavigateNext={shijianNext} onNavigatePrev={shijianPrev} />
       }
+      <PageArrows onPrev={shijianPrev} onNext={shijianNext} />
     </div>
   )
 }

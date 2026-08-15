@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from 'react'
 import { useCrossProjectNav } from './useCrossProjectNav'
+import PageArrows from './PageArrows'
 import NextProductHint from './NextProductHint'
 import dogImg from '@/imports/gunshu-dog.png'
 import screen01 from '@/imports/2.1.png'
@@ -461,6 +462,7 @@ function Header({ onBack, page, setPage }: { onBack: () => void; page: number; s
 
 function Page1({ visible, onDown, onNavigatePrev }: { visible: boolean; onDown: () => void; onNavigatePrev?: () => void }) {
   const lock = useRef(false)
+  const tStart = useRef({ x: 0, y: 0 })
   const handleWheel = useCallback((e: React.WheelEvent) => {
     if (lock.current) return
     lock.current = true
@@ -475,6 +477,26 @@ function Page1({ visible, onDown, onNavigatePrev }: { visible: boolean; onDown: 
     }
   }, [onDown, onNavigatePrev])
 
+  // Touch / tap fallback (mobile, no wheel)
+  const onTouchStart = (e: React.TouchEvent) => { tStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY } }
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (lock.current) return
+    const dx = e.changedTouches[0].clientX - tStart.current.x
+    const dy = e.changedTouches[0].clientY - tStart.current.y
+    if (Math.abs(dy) < 50 && Math.abs(dx) < 50) return
+    const up = dy < 0 || (Math.abs(dx) > Math.abs(dy) && dx < 0)
+    const down = dy > 0 || (Math.abs(dx) > Math.abs(dy) && dx > 0)
+    if (down) { lock.current = true; onDown(); setTimeout(() => { lock.current = false }, 700) }
+    else if (up && onNavigatePrev) onNavigatePrev()
+  }
+  const onClick = (e: React.MouseEvent) => {
+    if (lock.current) return
+    lock.current = true
+    if (e.clientX < window.innerWidth / 2) { if (onNavigatePrev) onNavigatePrev() }
+    else { onDown() }
+    setTimeout(() => { lock.current = false }, 700)
+  }
+
   return (
     <div
       style={{
@@ -484,6 +506,9 @@ function Page1({ visible, onDown, onNavigatePrev }: { visible: boolean; onDown: 
         overflow: 'hidden', display: 'flex', flexDirection: 'column',
       }}
       onWheel={handleWheel}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+      onClick={onClick}
     >
       <div style={{ flex: 1, padding: '28px 56px 20px', display: 'flex', flexDirection: 'column', minHeight: 0, gap: 0, position: 'relative' }}>
 
@@ -798,15 +823,16 @@ function CarouselCard({ spec, isActive, hovering, onEnter, onLeave, onScreenshot
   )
 }
 
-function Page2({ visible, onUp, onNavigateNext, initialActiveIdx = 0 }: {
+function Page2({ visible, onUp, onNavigateNext, activeIdx, setActiveIdx }: {
   visible: boolean; onUp: () => void
   onNavigateNext?: () => void
-  initialActiveIdx?: number
+  activeIdx: number
+  setActiveIdx: (updater: (prev: number) => number) => void
 }) {
-  const [activeIdx, setActiveIdx] = useState(initialActiveIdx)
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null)
   const lock = useRef(false)
+  const tStart = useRef({ x: 0, y: 0 })
 
   const CARD_W = 520
   const INACTIVE_SCALE = 0.78
@@ -827,6 +853,38 @@ function Page2({ visible, onUp, onNavigateNext, initialActiveIdx = 0 }: {
     }
   }, [activeIdx, onUp, onNavigateNext])
 
+  // Touch / tap fallback (mobile, no wheel)
+  const onTouchStart = (e: React.TouchEvent) => { tStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY } }
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (lock.current) return
+    const dx = e.changedTouches[0].clientX - tStart.current.x
+    const dy = e.changedTouches[0].clientY - tStart.current.y
+    if (Math.abs(dy) < 50 && Math.abs(dx) < 50) return
+    const up = dy < 0 || (Math.abs(dx) > Math.abs(dy) && dx < 0)
+    const down = dy > 0 || (Math.abs(dx) > Math.abs(dy) && dx > 0)
+    if (down) {
+      lock.current = true
+      if (activeIdx < 2) { setActiveIdx(i => i + 1); setTimeout(() => { lock.current = false }, 500) }
+      else if (onNavigateNext) onNavigateNext()
+    } else if (up) {
+      lock.current = true
+      if (activeIdx > 0) { setActiveIdx(i => i - 1); setTimeout(() => { lock.current = false }, 500) }
+      else onUp()
+    }
+  }
+  const onClick = (e: React.MouseEvent) => {
+    if (lock.current) return
+    lock.current = true
+    const left = e.clientX < window.innerWidth / 2
+    if (!left) {
+      if (activeIdx < 2) { setActiveIdx(i => i + 1); setTimeout(() => { lock.current = false }, 500) }
+      else if (onNavigateNext) onNavigateNext()
+    } else {
+      if (activeIdx > 0) { setActiveIdx(i => i - 1); setTimeout(() => { lock.current = false }, 500) }
+      else onUp()
+    }
+  }
+
   function cardPos(cardIdx: number) {
     const rel = cardIdx - activeIdx
     const tx = rel * OFFSET
@@ -844,6 +902,9 @@ function Page2({ visible, onUp, onNavigateNext, initialActiveIdx = 0 }: {
         transition: 'opacity 0.38s ease', overflow: 'hidden',
       }}
       onWheel={handleWheel}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+      onClick={onClick}
     >
       {/* Hover hot-zones: hover left side → slide up (prev), hover right side → slide down (next) */}
       {activeIdx > 0 && (
@@ -1026,10 +1087,14 @@ export default function GunshuPage({
   onNavigateNext?: () => void
 }) {
   const [page, setPage] = useState(initialPage)
+  const [activeIdx, setActiveIdx] = useState(initialActiveIdx)
+  const navLock = useRef(false)
 
-  // Keep latest page in a ref so the boundary predicates stay stable.
+  // Keep latest page/idx in a ref so the boundary predicates stay stable.
   const pageRef = useRef(page)
   pageRef.current = page
+  const idxRef = useRef(activeIdx)
+  idxRef.current = activeIdx
   useCrossProjectNav({
     onPrev: onNavigatePrev,
     onNext: onNavigateNext,
@@ -1037,11 +1102,39 @@ export default function GunshuPage({
     canNext: () => false,                   // down-nav handled inside: Page1→Page2, Page2 carousel end→next project
   })
 
+  /* ── unified next/prev (used by touch, tap and arrows) ── */
+  const gunshuNext = useCallback(() => {
+    if (navLock.current) return
+    navLock.current = true
+    if (pageRef.current === 0) { setPage(1) }
+    else {
+      if (idxRef.current < 2) setActiveIdx(i => i + 1)
+      else if (onNavigateNext) onNavigateNext()
+    }
+    setTimeout(() => { navLock.current = false }, 600)
+  }, [onNavigateNext])
+  const gunshuPrev = useCallback(() => {
+    if (navLock.current) return
+    navLock.current = true
+    if (pageRef.current === 1) {
+      if (idxRef.current > 0) setActiveIdx(i => i - 1)
+      else setPage(0)
+    } else if (onNavigatePrev) onNavigatePrev()
+    setTimeout(() => { navLock.current = false }, 600)
+  }, [onNavigatePrev])
+
   return (
     <div style={{ position: 'fixed', inset: 0, background: '#FAF8F3', zIndex: 100, overflow: 'hidden' }}>
       <Header onBack={onBack} page={page} setPage={setPage} />
-      <Page1 visible={page === 0} onDown={() => setPage(1)} onNavigatePrev={onNavigatePrev} />
-      <Page2 visible={page === 1} onUp={() => setPage(0)} onNavigateNext={onNavigateNext} initialActiveIdx={initialActiveIdx} />
+      <Page1 visible={page === 0} onDown={() => setPage(1)} onNavigatePrev={gunshuPrev} />
+      <Page2
+        visible={page === 1}
+        onUp={() => setPage(0)}
+        onNavigateNext={gunshuNext}
+        activeIdx={activeIdx}
+        setActiveIdx={setActiveIdx}
+      />
+      <PageArrows onPrev={gunshuPrev} onNext={gunshuNext} />
     </div>
   )
 }

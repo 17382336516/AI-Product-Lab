@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import dogContact from '@/imports/__2-1.png'
 import logoImg from '@/imports/1a649729676d49b38321ae06f8ab5352.png'
 import { useViewport } from './useViewport'
+import { useTouchNavigation } from './useTouchNavigation'
+import PageArrows from './PageArrows'
 import emailjs from '@emailjs/browser'
 import { emailConfig } from './config/email'
 
@@ -341,6 +343,13 @@ export default function ContactPage({ onBack, onScrollPrev }: { onBack: () => vo
     window.addEventListener('wheel', handleWheel, { passive: true })
     return () => window.removeEventListener('wheel', handleWheel)
   }, [onScrollPrev])
+
+  /* ── mobile touch / tap fallback (last page: only prev) ── */
+  useTouchNavigation({
+    onPrev: () => {
+      if (typeof (onScrollPrev as unknown as () => void) === 'function') (onScrollPrev as () => void)()
+    },
+  })
 
   function showToast(msg: string) {
     setToastMsg(msg)
@@ -714,6 +723,7 @@ export default function ContactPage({ onBack, onScrollPrev }: { onBack: () => vo
       </div>
 
       <Toast message={toastMsg} visible={toastVisible} />
+      <PageArrows showNext={false} onPrev={onScrollPrev} />
     </div>
   )
 }

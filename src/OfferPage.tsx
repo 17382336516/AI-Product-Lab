@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useCrossProjectNav } from './useCrossProjectNav'
+import { useTouchNavigation } from './useTouchNavigation'
+import PageArrows from './PageArrows'
 import NextProductHint from './NextProductHint'
 
 /* ── Dog ── */
@@ -1048,6 +1050,28 @@ export default function OfferPage({
   const goToS2 = () => { setPhase('fading'); setTimeout(() => setPhase('s2'), 340) }
   const goToS1 = () => { setPhase('s1'); setWorkflowStep(0) }
 
+  /* ── mobile touch / tap fallback (mirrors wheel logic) ── */
+  const handleOfferNext = useCallback(() => {
+    if (navLock.current) return
+    if (phase === 's1') {
+      goToS2()
+    } else if (phase === 's2') {
+      if (workflowStep < 3) setWorkflowStep(p => p + 1)
+      else if (onNavigateNext) { navLock.current = true; onNavigateNext() }
+    }
+  }, [phase, workflowStep, onNavigateNext])
+  const handleOfferPrev = useCallback(() => {
+    if (navLock.current) return
+    if (phase === 's2') {
+      if (workflowStep > 0) setWorkflowStep(p => p - 1)
+      else goToS1()
+    } else if (phase === 's1') {
+      navLock.current = true
+      handleBack()
+    }
+  }, [phase, workflowStep, handleBack])
+  useTouchNavigation({ onPrev: handleOfferPrev, onNext: handleOfferNext })
+
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 100,
@@ -1104,6 +1128,8 @@ export default function OfferPage({
         {phase !== 's2' && <WhyScreen fading={phase === 'fading'} />}
         <Screen2 visible={phase === 's2'} workflowStep={workflowStep} />
       </div>
+
+      <PageArrows onPrev={handleOfferPrev} onNext={handleOfferNext} />
     </div>
   )
 }
