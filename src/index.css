@@ -1,6 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Kalam:wght@300;400;700&family=Fredoka:wght@300..700&display=swap');
 @import 'tailwindcss';
 
+/* Stop the mobile webview (WeChat / Safari fullscreen) from showing the
+   default black <html> behind the scaled canvas. The leftover letterbox
+   area must read as the warm paper tone, never black. */
+html, body {
+  background: #FAF7F0;
+  margin: 0;
+  padding: 0;
+}
+
 /* ── Virtual Canvas scaler (see CanvasScaler.tsx) ──
    The design surface is a fixed 1440px wide canvas; its height follows the
    page's actual rendered content (no global fixed 900). CanvasScaler scales
@@ -15,7 +24,7 @@
   width: 100vw;
   height: 100dvh;
   overflow: hidden;
-  background: transparent;       /* show body background colour, no black bars */
+  background: #FAF7F0;           /* paper tone letterbox — never black bars */
   display: flex;
   align-items: center;
   justify-content: center;

@@ -2,6 +2,7 @@ import { useState, useCallback, useRef } from 'react'
 import { useCrossProjectNav } from './useCrossProjectNav'
 import PageArrows from './PageArrows'
 import NextProductHint from './NextProductHint'
+import Lightbox from './Lightbox'
 import dogImg from '@/imports/gunshu-dog.png'
 import screen01 from '@/imports/2.1.png'
 import screen02 from '@/imports/2.2.png'
@@ -1050,21 +1051,7 @@ function Page2({ visible, onUp, onNavigateNext, activeIdx, setActiveIdx }: {
 
       <TryGunshuButton />
 
-      {lightboxSrc && (
-        <div data-no-turn onClick={() => setLightboxSrc(null)} style={{
-          position: 'absolute', inset: 0, zIndex: 200,
-          background: 'rgba(28,24,20,0.82)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: 48, cursor: 'var(--cursor-cute), pointer',
-          animation: 'lightboxFade 220ms ease',
-        }}>
-          <img src={lightboxSrc} alt="screenshot" onClick={e => e.stopPropagation()} style={{
-            maxWidth: '92%', maxHeight: '92%', objectFit: 'contain', borderRadius: 16,
-            boxShadow: '0 30px 80px rgba(0,0,0,0.5)', background: '#fff',
-          }} />
-          <div style={{ position: 'absolute', top: 24, right: 28, color: '#fff', fontFamily: F, fontSize: 13, opacity: 0.8 }}>点击空白处关闭 ✕</div>
-        </div>
-      )}
+      <Lightbox src={lightboxSrc} alt="screenshot" onClose={() => setLightboxSrc(null)} />
     </div>
   )
 }

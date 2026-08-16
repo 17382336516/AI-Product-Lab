@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, type ReactNode, type WheelEvent, Fragment } from 'react'
 import PageArrows from './PageArrows'
+import Lightbox from './Lightbox'
 
 /* ── Why screen assets ── */
 import valueCard01 from '@/imports/4.1.png'
@@ -728,55 +729,13 @@ function HowScreen({ onNavigateNext, onNavigatePrev }: { onNavigateNext?: () => 
           )
         })}
 
-        {/* ══ Lightbox: click to view full-size screenshot ══ */}
-        {lightbox !== null && (
-          <div data-no-turn
-            onClick={() => setLightbox(null)}
-            style={{
-              position: 'fixed', inset: 0, zIndex: 300,
-              background: 'rgba(28,22,18,0.82)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: 40, boxSizing: 'border-box',
-              cursor: 'zoom-out',
-            }}
-          >
-            <img
-              src={SCENES[lightbox].img}
-              alt={SCENES[lightbox].name}
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                maxWidth: '92vw', maxHeight: '88vh',
-                width: 'auto', height: 'auto',
-                borderRadius: 14,
-                boxShadow: '0 30px 80px rgba(0,0,0,0.45)',
-                objectFit: 'contain',
-              }}
-            />
-            <div
-              onClick={() => setLightbox(null)}
-              style={{
-                position: 'absolute', top: 24, right: 28,
-                width: 44, height: 44, borderRadius: '50%',
-                background: 'rgba(255,255,255,0.14)',
-                color: '#fff', fontSize: 26, lineHeight: '44px',
-                textAlign: 'center', cursor: 'pointer',
-                userSelect: 'none', backdropFilter: 'blur(4px)',
-              }}
-            >
-              ×
-            </div>
-            <div
-              style={{
-                position: 'absolute', bottom: 28, left: '50%',
-                transform: 'translateX(-50%)',
-                fontFamily: F, fontSize: 15, color: 'rgba(255,255,255,0.85)',
-                letterSpacing: '0.04em',
-              }}
-            >
-              {SCENES[lightbox].name}
-            </div>
-          </div>
-        )}
+        {/* ══ Lightbox: click to view full-size screenshot (portaled to body) ══ */}
+        <Lightbox
+          src={lightbox !== null ? SCENES[lightbox].img : null}
+          alt={lightbox !== null ? SCENES[lightbox].name : ""}
+          caption={lightbox !== null ? SCENES[lightbox].name : undefined}
+          onClose={() => setLightbox(null)}
+        />
       </div>
     </div>
   )

@@ -3,6 +3,7 @@ import { useCrossProjectNav } from './useCrossProjectNav'
 import { useTouchNavigation } from './useTouchNavigation'
 import PageArrows from './PageArrows'
 import NextProductHint from './NextProductHint'
+import Lightbox from './Lightbox'
 
 /* ── Dog ── */
 import dogImg from '@/imports/860832308b1dc5fc7ce52f10234ec4ac.jpg'
@@ -948,24 +949,8 @@ function Screen2({ visible, workflowStep }: { visible: boolean; workflowStep: nu
           text={workflowStep === 3 ? '下滑了解下一个产品' : '下滑了解下一个功能'}
         />
 
-        {/* Lightbox — click to enlarge screenshot */}
-        {zoomImg && (
-          <div data-no-turn
-            onClick={() => setZoomImg(null)}
-            style={{
-              position: 'fixed', inset: 0, zIndex: 400,
-              background: 'rgba(40,32,26,0.86)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: 32, cursor: 'zoom-out',
-            }}
-          >
-            <img
-              src={zoomImg}
-              alt="enlarged"
-              style={{ maxWidth: '92vw', maxHeight: '88vh', borderRadius: 16, boxShadow: '0 20px 60px rgba(0,0,0,0.4)', objectFit: 'contain' }}
-            />
-          </div>
-        )}
+        {/* Lightbox — click to enlarge screenshot (portaled to body) */}
+        <Lightbox src={zoomImg} alt="enlarged" onClose={() => setZoomImg(null)} />
       </div>
     </div>
   )
