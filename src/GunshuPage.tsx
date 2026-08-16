@@ -780,7 +780,7 @@ function CarouselCard({ spec, isActive, hovering, onEnter, onLeave, onScreenshot
       </div>
 
       {/* Screenshot */}
-      <div onClick={onScreenshotClick} style={{ borderRadius: 14, overflow: 'hidden', height: 300, marginBottom: 16, flexShrink: 0, border: '1px solid rgba(220,210,195,0.3)', background: '#fff', cursor: 'var(--cursor-cute), pointer', position: 'relative' }}>
+      <div data-no-turn onClick={onScreenshotClick} style={{ borderRadius: 14, overflow: 'hidden', height: 300, marginBottom: 16, flexShrink: 0, border: '1px solid rgba(220,210,195,0.3)', background: '#fff', cursor: 'var(--cursor-cute), pointer', position: 'relative' }}>
         <img src={spec.screen} alt={spec.title} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'top center', display: 'block' }} />
         <div style={{ position: 'absolute', right: 10, bottom: 10, padding: '4px 10px', borderRadius: 100, background: 'rgba(41,41,41,0.62)', color: '#fff', fontFamily: F, fontSize: 11, fontWeight: 600, pointerEvents: 'none' }}>点击放大</div>
       </div>
@@ -1051,7 +1051,7 @@ function Page2({ visible, onUp, onNavigateNext, activeIdx, setActiveIdx }: {
       <TryGunshuButton />
 
       {lightboxSrc && (
-        <div onClick={() => setLightboxSrc(null)} style={{
+        <div data-no-turn onClick={() => setLightboxSrc(null)} style={{
           position: 'absolute', inset: 0, zIndex: 200,
           background: 'rgba(28,24,20,0.82)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',

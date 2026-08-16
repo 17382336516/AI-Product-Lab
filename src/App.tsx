@@ -465,7 +465,7 @@ function ProjectCardStack({ mounted, deckScale, onNavigateOffer, onNavigateGunsh
         position: 'relative',
         width: containerW,
         margin: '0 auto',
-        height: Math.round(cardH + 44 * deckScale),
+        height: Math.round(cardH + 76 * deckScale),
         cursor: expanded ? 'default' : 'pointer',
         opacity: mounted ? 1 : 0,
         transition: 'opacity 0.7s ease 0.45s',

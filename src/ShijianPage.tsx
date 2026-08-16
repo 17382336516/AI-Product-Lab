@@ -687,6 +687,7 @@ function HowScreen({ onNavigateNext, onNavigatePrev }: { onNavigateNext?: () => 
 
               {/* Screenshot card */}
               <div
+                data-no-turn
                 onClick={() => setLightbox(i)}
                 style={{
                   flex: 1, minHeight: 0,
@@ -729,7 +730,7 @@ function HowScreen({ onNavigateNext, onNavigatePrev }: { onNavigateNext?: () => 
 
         {/* ══ Lightbox: click to view full-size screenshot ══ */}
         {lightbox !== null && (
-          <div
+          <div data-no-turn
             onClick={() => setLightbox(null)}
             style={{
               position: 'fixed', inset: 0, zIndex: 300,

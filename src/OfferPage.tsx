@@ -869,7 +869,7 @@ function Screen2({ visible, workflowStep }: { visible: boolean; workflowStep: nu
             }}>
               {/* Membership screenshot — only for step 04, left of FLOW */}
               {i === 3 && (
-                <div style={{
+                <div data-no-turn style={{
                   width: 275, flexShrink: 0,
                   position: 'relative', cursor: 'zoom-in',
                   borderRadius: 18, overflow: 'hidden',
@@ -901,7 +901,7 @@ function Screen2({ visible, workflowStep }: { visible: boolean; workflowStep: nu
               </div>
 
               {/* Real screenshot — no accent border, clean floating shadow */}
-              <div style={{
+              <div data-no-turn style={{
                 width: i === 3 ? 760 : 860, flexShrink: 0,
                 position: 'relative',
                 borderRadius: 20, overflow: 'hidden',
@@ -950,7 +950,7 @@ function Screen2({ visible, workflowStep }: { visible: boolean; workflowStep: nu
 
         {/* Lightbox — click to enlarge screenshot */}
         {zoomImg && (
-          <div
+          <div data-no-turn
             onClick={() => setZoomImg(null)}
             style={{
               position: 'fixed', inset: 0, zIndex: 400,

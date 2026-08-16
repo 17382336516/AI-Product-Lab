@@ -1,0 +1,10 @@
+{
+  "description": "Showcase your expertise as an AI Product Manager with a visually appealing portfolio that combines creativity, professionalism, and a personal touch.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

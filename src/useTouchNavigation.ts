@@ -59,7 +59,12 @@ export function useTouchNavigation({
       else if (down) goPrev()
     }
     const onClick = (e: MouseEvent) => {
-      // 触摸设备的 synthesized click：用坐标判断左右半屏
+      // 触摸设备的 synthesized click：用坐标判断左右半屏。
+      // 但如果点击落在页面内自带交互的元素（截图放大区、lightbox 遮罩、
+      // 按钮、链接等），则交给它们处理，不触发翻页——否则点截图放大会
+      // 被同时翻页抢走。
+      const t = e.target as HTMLElement | null
+      if (t && t.closest('[data-no-turn], a, button')) return
       const w = window.innerWidth
       if (e.clientX < w / 2) goPrev()
       else goNext()
