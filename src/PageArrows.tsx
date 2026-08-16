@@ -37,16 +37,16 @@ export default function PageArrows({
     width: 38,
     height: 38,
     borderRadius: "50%",
-    background: "rgba(250,247,240,0.35)",
-    border: "1px solid rgba(44,40,32,0.16)",
+    background: "rgba(250,247,240,0.45)",
+    border: "1px solid rgba(44,40,32,0.28)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    color: "rgba(44,40,32,0.5)",
+    color: "rgba(44,40,32,0.7)",
     cursor: "pointer",
     zIndex: 60,
     userSelect: "none",
-    opacity: 0.32,
+    opacity: 0.55,
     backdropFilter: "blur(2px)",
     WebkitBackdropFilter: "blur(2px)",
     transition: "opacity 0.25s ease, color 0.25s ease, border-color 0.25s ease",
@@ -71,9 +71,9 @@ export default function PageArrows({
   )
 
   const hoverStyle: React.CSSProperties = {
-    opacity: 0.75,
-    color: "rgba(44,40,32,0.8)",
-    border: "1px solid rgba(44,40,32,0.28)",
+    opacity: 0.95,
+    color: "rgba(44,40,32,0.95)",
+    border: "1px solid rgba(44,40,32,0.45)",
   }
 
   return (
