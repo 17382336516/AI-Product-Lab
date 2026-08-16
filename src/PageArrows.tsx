@@ -29,46 +29,79 @@ export default function PageArrows({
 
   if (!visible) return null
 
+  // Lightweight, low-key arrows that blend with the warm paper tone of the
+  // portfolio (no heavy filled discs — just a hair-line ring + thin chevron).
   const base: React.CSSProperties = {
     position: "absolute",
-    bottom: 18,
-    width: 44,
-    height: 44,
+    bottom: 20,
+    width: 38,
+    height: 38,
     borderRadius: "50%",
-    background: "rgba(30,28,24,0.55)",
-    color: "#fff",
-    border: "1px solid rgba(255,255,255,0.25)",
+    background: "rgba(250,247,240,0.35)",
+    border: "1px solid rgba(44,40,32,0.16)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: 20,
+    color: "rgba(44,40,32,0.5)",
     cursor: "pointer",
     zIndex: 60,
     userSelect: "none",
+    opacity: 0.32,
+    backdropFilter: "blur(2px)",
+    WebkitBackdropFilter: "blur(2px)",
+    transition: "opacity 0.25s ease, color 0.25s ease, border-color 0.25s ease",
+  }
+
+  const chevron = (dir: "left" | "right") => (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      style={{ display: "block" }}
+    >
+      <path
+        d={dir === "left" ? "M10 3 L5 8 L10 13" : "M6 3 L11 8 L6 13"}
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+
+  const hoverStyle: React.CSSProperties = {
+    opacity: 0.75,
+    color: "rgba(44,40,32,0.8)",
+    border: "1px solid rgba(44,40,32,0.28)",
   }
 
   return (
     <>
       {showPrev && onPrev && (
         <div
-          style={{ ...base, left: 18 }}
+          style={{ ...base, left: 16 }}
+          onMouseEnter={(e) => Object.assign(e.currentTarget.style, hoverStyle)}
+          onMouseLeave={(e) => Object.assign(e.currentTarget.style, base)}
           onClick={(e) => {
             e.stopPropagation()
             onPrev()
           }}
         >
-          ‹
+          {chevron("left")}
         </div>
       )}
       {showNext && onNext && (
         <div
           style={{ ...base, right: 18 }}
+          onMouseEnter={(e) => Object.assign(e.currentTarget.style, hoverStyle)}
+          onMouseLeave={(e) => Object.assign(e.currentTarget.style, base)}
           onClick={(e) => {
             e.stopPropagation()
             onNext()
           }}
         >
-          ›
+          {chevron("right")}
         </div>
       )}
     </>

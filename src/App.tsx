@@ -4,7 +4,6 @@ import GunshuPage from './GunshuPage'
 import ShijianPage from './ShijianPage'
 import ContactPage from './ContactPage'
 import { useViewport } from './useViewport'
-import { useTouchNavigation } from './useTouchNavigation'
 import PageArrows from './PageArrows'
 import img1 from '@/imports/image-2.png'                              // Offer到
 import img3 from '@/imports/image-3.png'                             // 群策
@@ -473,6 +472,7 @@ function ProjectCardStack({ mounted, deckScale, onNavigateOffer, onNavigateGunsh
       }}
       onMouseEnter={() => setExpanded(true)}
       onMouseLeave={() => { setExpanded(false); setHoveredCard(null) }}
+      onClick={() => setExpanded(true)}
     >
       {projects.map((project, i) => {
         const isCardHovered = hoveredCard === i && expanded
@@ -503,16 +503,14 @@ function ProjectCardStack({ mounted, deckScale, onNavigateOffer, onNavigateGunsh
             }}
             onClick={(e) => {
               e.preventDefault()
-              // Touch device: navigate immediately on a single tap.
-              if (isTouchDevice) {
-                if (project.id === 0) onNavigateOffer()
-                else if (project.id === 1) onNavigateGunshu()
-                else if (project.id === 3) onNavigateShijian()
+              e.stopPropagation()
+              // First tap/click expands the deck; a second tap on an already
+              // expanded card navigates into that project. This keeps the
+              // interaction identical on touch (no hover) and desktop.
+              if (!expanded) {
+                setExpanded(true)
                 return
               }
-              // Hover-capable device: keep the original behaviour — only jump
-              // after the deck has been expanded by hover.
-              if (!expanded) return
               if (project.id === 0) onNavigateOffer()
               else if (project.id === 1) onNavigateGunshu()
               else if (project.id === 3) onNavigateShijian()
@@ -537,13 +535,15 @@ function ProjectCardStack({ mounted, deckScale, onNavigateOffer, onNavigateGunsh
           fontSize: 13,
           color: '#B8AFA4',
           letterSpacing: '0.04em',
-          opacity: expanded ? 0 : 0.9,
+          opacity: 0.9,
           transition: 'opacity 0.25s ease',
           pointerEvents: 'none',
           userSelect: 'none',
         }}
       >
-        hover to explore ✦
+        {isTouchDevice
+          ? (expanded ? '点击卡片 · 查看项目' : '轻触卡片或空白处 · 展开作品')
+          : (expanded ? 'click a card ✦' : 'hover to explore ✦')}
       </div>
     </div>
   )
@@ -906,13 +906,6 @@ export default function App() {
     return () => window.removeEventListener('wheel', handler)
   }, [offerOpen, gunshuOpen, shijianOpen, contactOpen, openOffer])
 
-  /* ── home touch / tap → open Offer (mobile fallback) ── */
-  useTouchNavigation({
-    onNext: () => {
-      if (!(offerOpen || gunshuOpen || shijianOpen || contactOpen)) openOffer()
-    },
-  })
-
   /* ── close back to home ── */
   const closeOffer   = useCallback(() => unbloom(() => setOfferOpen(false)),   [])
   const closeGunshu  = useCallback(() => unbloom(() => setGunshuOpen(false)),  [])
@@ -961,7 +954,6 @@ export default function App() {
         <Clothesline />
         <BrandHeader vp={vp} />
         <HeroSection mounted={mounted} vp={vp} onNavigateOffer={openOffer} onNavigateGunshu={openGunshu} onNavigateShijian={openShijian} />
-        <PageArrows showPrev={false} onNext={openOffer} />
       </div>
 
       {/* Page-bloom transition overlay */}

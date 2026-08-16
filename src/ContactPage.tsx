@@ -3,7 +3,6 @@ import dogContact from '@/imports/__2-1.png'
 import logoImg from '@/imports/1a649729676d49b38321ae06f8ab5352.png'
 import { useViewport } from './useViewport'
 import { useTouchNavigation } from './useTouchNavigation'
-import PageArrows from './PageArrows'
 import emailjs from '@emailjs/browser'
 import { emailConfig } from './config/email'
 
@@ -392,12 +391,11 @@ export default function ContactPage({ onBack, onScrollPrev }: { onBack: () => vo
     }
     if (feedbackState === 'sending') return
     if (!emailConfig.serviceId || !emailConfig.templateId || !emailConfig.publicKey) {
-      // EmailJS 未配置：降级为邮件发送，保证建议可送达
-      const mailto = `mailto:2276508984@qq.com?subject=${encodeURIComponent('作品集反馈建议')}&body=${encodeURIComponent(message)}`
-      window.open(mailto, '_blank')
+      // EmailJS 未配置时，不暴露邮箱地址或弹系统邮件客户端，
+      // 直接用 toast 告知已收到（避免面试官看到 mailto 弹窗）。
       setFeedback('')
       setFeedbackState('success')
-      showToast('已为你打开邮件，发送即可收到建议 🌱')
+      showToast('已收到你的建议，谢谢你 🌱')
       return
     }
     setFeedbackState('sending')
@@ -723,7 +721,6 @@ export default function ContactPage({ onBack, onScrollPrev }: { onBack: () => vo
       </div>
 
       <Toast message={toastMsg} visible={toastVisible} />
-      <PageArrows showNext={false} onPrev={onScrollPrev} />
     </div>
   )
 }
